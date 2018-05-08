@@ -167,6 +167,9 @@ class Queue:
         """
         return self.list.pop()
 
+    def top(self):
+        return self.list[-1]
+
     def isEmpty(self):
         "Returns true if the queue is empty"
         return len(self.list) == 0
@@ -188,8 +191,11 @@ class PriorityQueue:
         self.count += 1
 
     def pop(self):
-        (_, _, item) = heapq.heappop(self.heap)
-        return item
+        (priority, _, item) = heapq.heappop(self.heap)
+        return priority, item
+
+    def top(self):
+        return self.heap[0]
 
     def isEmpty(self):
         return len(self.heap) == 0

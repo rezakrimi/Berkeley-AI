@@ -132,14 +132,106 @@ def depthFirstSearch(problem):
     return path
     util.raiseNotDefined()
 
+
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
+
+    from game import Directions
+    s = Directions.SOUTH
+    w = Directions.WEST
+    n = Directions.NORTH
+    e = Directions.EAST
+
+    result = []
+    qu = util.Queue()
+    visited = set([])
+    current = problem.getStartState()
+    qu.push([(current, "", 0)])
+
+    while not qu.isEmpty():
+        current = qu.pop()
+        visited.add(current[-1][0])
+
+        if problem.isGoalState(current[-1][0]):
+            result = current
+            break
+
+        for each in problem.getSuccessors(current[-1][0]):
+            if each[0] not in visited:
+                temp = list(current)
+                temp.append(each)
+                qu.push(temp)
+
+    path = []
+    for each in result:
+        if each[1] == "South":
+            path.append(s)
+        elif each[1] == "West":
+            path.append(w)
+        elif each[1] == "North":
+            path.append(n)
+        elif each[1] == "East":
+            path.append(e)
+
+    return path
     util.raiseNotDefined()
+
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
+    from game import Directions
+    s = Directions.SOUTH
+    w = Directions.WEST
+    n = Directions.NORTH
+    e = Directions.EAST
+
+    result = []
+    qu = util.PriorityQueue()
+    visited = set([])
+    current = (problem.getStartState(), "", 0)
+    qu.update(current, 0)
+    costs = {}
+    parents = {}
+    parents[problem.getStartState()] = (problem.getStartState(), "")
+
+    while not qu.isEmpty():
+        cost, current= qu.pop()
+        visited.add(current[0])
+
+        if problem.isGoalState(current[0]):
+            result = current[0]
+            break
+
+        for each in problem.getSuccessors(current[0]):
+            if each[0] not in visited:
+                qu.update(each, cost+each[2])
+                if each[0] not in costs:
+                    costs[each[0]] = cost+each[2]
+                    parents[each[0]] = (current[0], each[1])
+                elif costs[each[0]] > cost+each[2]:
+                    costs[each[0]] = cost + each[2]
+                    parents[each[0]] = (current[0], each[1])
+
+    path = []
+    while parents[result][0] != result:
+        path.append(parents[result][1])
+        result = parents[result][0]
+
+    path.reverse()
+    result = []
+    for each in path:
+        if each == "South":
+            result.append(s)
+        elif each == "West":
+            result.append(w)
+        elif each == "North":
+            result.append(n)
+        elif each == "East":
+            result.append(e)
+
+    return result
     util.raiseNotDefined()
 
 def nullHeuristic(state, problem=None):
