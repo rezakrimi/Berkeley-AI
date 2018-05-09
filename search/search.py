@@ -133,10 +133,7 @@ def depthFirstSearch(problem):
     util.raiseNotDefined()
 
 
-def breadthFirstSearch(problem):
-    """Search the shallowest nodes in the search tree first."""
-    "*** YOUR CODE HERE ***"
-
+def get_path(input):
     from game import Directions
     s = Directions.SOUTH
     w = Directions.WEST
@@ -144,36 +141,42 @@ def breadthFirstSearch(problem):
     e = Directions.EAST
 
     result = []
+    for index in range(len(input)-1):
+        i, j = input[index][0]
+        i2, j2 = input[index+1][0]
+
+        if i2 == i+1: result.append(e)
+        elif i2 == i-1: result.append(w)
+        elif j2 == j+1: result.append(n)
+        elif j2 == j-1: result.append(s)
+    return result
+
+def breadthFirstSearch(problem):
+    """Search the shallowest nodes in the search tree first."""
+    "*** YOUR CODE HERE ***"
+    result = []
     qu = util.Queue()
     visited = set([])
-    current = problem.getStartState()
-    qu.push([(current, "", 0)])
+    current = [problem.getStartState()]
+
+    qu.push(current)
 
     while not qu.isEmpty():
         current = qu.pop()
-        visited.add(current[-1][0])
+        visited.add(current[-1])
 
-        if problem.isGoalState(current[-1][0]):
+        if problem.isGoalState(current[-1]):
             result = current
             break
 
-        for each in problem.getSuccessors(current[-1][0]):
+        for each in problem.getSuccessors(current[-1]):
             if each[0] not in visited:
                 temp = list(current)
-                temp.append(each)
+                temp.append(each[0])
                 qu.push(temp)
+                visited.add(each[0])
 
-    path = []
-    for each in result:
-        if each[1] == "South":
-            path.append(s)
-        elif each[1] == "West":
-            path.append(w)
-        elif each[1] == "North":
-            path.append(n)
-        elif each[1] == "East":
-            path.append(e)
-
+    path = get_path(result)
     return path
     util.raiseNotDefined()
 
@@ -244,6 +247,60 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
+
+    from game import Directions
+    s = Directions.SOUTH
+    w = Directions.WEST
+    n = Directions.NORTH
+    e = Directions.EAST
+
+    result = []
+    qu = util.PriorityQueue()
+    visited = set([])
+    current = (problem.getStartState(), "", 0)
+    qu.update(current, 0)
+    costs = {}
+    parents = {}
+    parents[problem.getStartState()] = (problem.getStartState(), "")
+
+    while not qu.isEmpty():
+        cost, current = qu.pop()
+        visited.add(current[0])
+
+        if problem.isGoalState(current[0]):
+            result = current[0]
+            break
+
+        for each in problem.getSuccessors(current[0]):
+            if each[0] not in visited:
+                qu.update(each, cost + each[2] + heuristic(each[0], problem))
+                if each[0] not in costs:
+                    costs[each[0]] = cost + each[2]
+                    parents[each[0]] = (current[0], each[1])
+                elif costs[each[0]] > cost + each[2] + heuristic(each[0], problem):
+                    costs[each[0]] = cost + each[2] + heuristic(each[0], problem)
+                    parents[each[0]] = (current[0], each[1])
+
+    path = []
+    while parents[result][0] != result:
+        path.append(parents[result][1])
+        result = parents[result][0]
+
+    path.reverse()
+    result = []
+    for each in path:
+        if each == "South":
+            result.append(s)
+        elif each == "West":
+            result.append(w)
+        elif each == "North":
+            result.append(n)
+        elif each == "East":
+            result.append(e)
+
+    return result
+    util.raiseNotDefined()
+
     util.raiseNotDefined()
 
 

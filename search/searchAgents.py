@@ -288,6 +288,10 @@ class CornersProblem(search.SearchProblem):
         # Please add any code here which you would like to use
         # in initializing the problem
         "*** YOUR CODE HERE ***"
+        temp = list(self.corners)
+        if self.startingPosition in temp:
+            del temp[temp.index(self.startingPosition)]
+        self.corners = tuple(temp)
 
     def getStartState(self):
         """
@@ -295,14 +299,19 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return self.startingPosition, self.corners
+
 
     def isGoalState(self, state):
         """
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        position, visited = state
+        if position in visited and len(visited) == 1:
+            return True
+        # return not visited
+        return False
 
     def getSuccessors(self, state):
         """
@@ -319,10 +328,23 @@ class CornersProblem(search.SearchProblem):
         for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
             # Add a successor state to the successor list if the action is legal
             # Here's a code snippet for figuring out whether a new position hits a wall:
-            #   x,y = currentPosition
-            #   dx, dy = Actions.directionToVector(action)
-            #   nextx, nexty = int(x + dx), int(y + dy)
-            #   hitsWall = self.walls[nextx][nexty]
+            position, visited_corners = state
+            x, y = position
+            dx, dy = Actions.directionToVector(action)
+            nextx, nexty = int(x + dx), int(y + dy)
+            if not self.walls[nextx][nexty]:
+                nextState = (nextx, nexty)
+                cost = 1
+
+                if position in visited_corners:
+                    temp = list(visited_corners)
+                    del temp[temp.index(position)]
+                    nextState = (nextState, tuple(temp))
+                    successors.append((nextState, action, cost))
+                else:
+                    nextState = (nextState, visited_corners)
+                    successors.append((nextState, action, cost))
+
 
             "*** YOUR CODE HERE ***"
 
